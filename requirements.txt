@@ -1,0 +1,4 @@
+wechaty==0.68
+python-dotenv==1.0.1
+openai==1.12.0
+lxml==5.1.0
