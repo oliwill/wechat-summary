@@ -1,16 +1,22 @@
 # 群讨论自动总结工具
 
-自动总结美股微信群讨论内容的工具，每天早上自动生成结构化报告。
+自动总结美股微信群、Discord 群讨论内容的工具，每天早上自动生成结构化报告。
+
+[![GitHub](https://img.shields.io/badge/GitHub-使用%20Git%20管理-blue)](https://github.com/你的用户名/wechat-summary)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue)](https://www.python.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-16+-green)](https://nodejs.org/)
 
 ## 功能特点
 
 - 📊 自动分析群消息，提取讨论主题
 - 💬 详细记录讨论内容和结论
 - 📈 识别讨论中的个股及观点
-- 🤖 基于 LLM 智能分析（支持 GLM、DeepSeek、OpenAI）
+- 🤖 基于 LLM 智能分析（支持 GLM 4.7、DeepSeek、OpenAI）
 - 📅 自动按时间筛选（昨天 00:00-23:59）
 - 🤖 支持跨天讨论处理
 - 📝 生成 Markdown 格式报告
+- 🔧 Mock 模式用于开发测试
+- 📦 支持 Git 版本管理
 
 ## 技术栈
 
