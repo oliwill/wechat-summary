@@ -1,0 +1,23 @@
+# Git 配置
+
+# 设置默认编码为 UTF-8
+* text=auto
+
+# Markdown 文件
+*.md text eol=lf
+
+# Python 文件
+*.py text eol=lf
+
+# JSON 文件
+*.json text eol=lf
+
+# YAML 文件
+*.yml text eol=lf
+
+# 环境变量文件（不要提交真实 Key）
+.env* -text
+*.key -text
+
+# 日志文件
+*.log -text
