@@ -1,4 +1,11 @@
-wechaty==0.68
+# WeChat 数据库解密与读取
+pywxdump-mini>=2024.0.0
+
+# 环境变量管理
 python-dotenv==1.0.1
-openai==1.12.0
+
+# LLM API
+openai>=1.12.0
+
+# 数据处理
 lxml==5.1.0
