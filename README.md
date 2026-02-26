@@ -1,44 +1,47 @@
 # 群讨论自动总结工具
 
-自动总结美股微信群、Discord 群讨论内容的工具，每天早上自动生成结构化报告。
+基于微信电脑版本地数据库的群消息总结工具，零封号风险，合规安全。
 
-[![GitHub](https://img.shields.io/badge/GitHub-使用%20Git%20管理-blue)](https://github.com/你的用户名/wechat-summary)
+[![GitHub](https://img.shields.io/badge/GitHub-微信%20群%20总结-blue)](https://github.com/oliwill/wechat-summary)
 [![Python](https://img.shields.io/badge/Python-3.8+-blue)](https://www.python.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-16+-green)](https://nodejs.org/)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
 ## 功能特点
 
 - 📊 自动分析群消息，提取讨论主题
 - 💬 详细记录讨论内容和结论
 - 📈 识别讨论中的个股及观点
-- 🤖 基于 LLM 智能分析（支持 GLM 4.7、DeepSeek、OpenAI）
-- 📅 自动按时间筛选（昨天 00:00-23:59）
-- 🤖 支持跨天讨论处理
+- 🤖 基于 LLM 智能分析（支持智谱 AI、DeepSeek、OpenAI）
+- 📅 按时间范围筛选消息
 - 📝 生成 Markdown 格式报告
-- 🔧 Mock 模式用于开发测试
-- 📦 支持 Git 版本管理
+- ✅ **零封号风险**（使用微信官方备份功能）
+- 🔒 **合规安全**（仅分析个人数据）
+
+## 核心变化
+
+| 原方案 | 新方案 |
+|--------|--------|
+| Wechaty（网页协议） | 微信电脑版 MSG.db |
+| 实时监听 | 本地数据库读取 |
+| 高封号风险 | 零风险合规 |
 
 ## 技术栈
 
 - **Python 3.8+**
-- **Wechaty** - 微信机器人框架
+- **PyWxDump** - 微信数据库解密
 - **OpenAI SDK** - LLM API 客户端
-- **智谱 AI GLM** - 推荐使用（性价比高）
-- **DeepSeek** - 备选方案
-- **OpenAI** - 备选方案
+- **SQLite** - 微信数据库读取
 
-## 安装步骤
+## 快速开始
 
 ### 1. 安装依赖
 
 ```bash
 cd wechat-summary
-pip install --break-system-packages wechaty openai lxml
+pip install pywxdump-mini python-dotenv openai lxml
 ```
 
 ### 2. 配置环境变量
-
-复制 `.env.example` 到 `.env` 并填写配置：
 
 ```bash
 cp .env.example .env
@@ -47,98 +50,75 @@ cp .env.example .env
 编辑 `.env` 文件：
 
 ```bash
-# 微信登录配置（从 wechaty.io 获取）
-WECHATY_TOKEN=your-wechaty-token-here
-
-# LLM API 配置（推荐使用智谱 AI GLM）
-# 智谱 AI：https://open.bigmodel.cn/
+# LLM API 配置（推荐智谱 AI）
 ZHIPU_API_KEY=your-zhipu-api-key-here
 ZHIPU_BASE_URL=https://open.bigmodel.cn/api/paas/v4
 
-# 或使用 DeepSeek
-# DEEPSEEK_API_KEY=your-deepseek-api-key-here
-# DEEPSEEK_BASE_URL=https://api.deepseek.com
-
-# 群聊配置
-TARGET_GROUPS=["美股交流群1", "美股策略群"]
-GROUP_IDS=["7273788767", "1234567890"]
+# 目标群组（可选，运行时可交互选择）
+TARGET_ROOMS=["美股交流群1", "美股策略群"]
 ```
 
-### 3. 获取智谱 AI API Key
+### 3. 微信电脑版备份
 
-1. 访问 [智谱 AI 平台](https://open.bigmodel.cn/)
+首次使用前，需要在微信电脑版中备份聊天记录：
+
+1. 打开微信电脑版
+2. 设置 → 聊天记录备份 → 备份到电脑
+3. 备份完成后，数据存储在 `~/Documents/WeChat Files/[wxid]/MSG/`
+
+### 4. 获取 LLM API Key
+
+**智谱 AI（推荐）**：
+1. 访问 https://open.bigmodel.cn/
 2. 使用 GitHub 登录
-3. 进入 [API Keys 页面](https://open.bigmodel.cn/usercenter/apikeys)
-4. 创建新的 API Key
-5. 复制 Key 并填入 `.env` 文件
-
-### 4. 获取 Wechaty Token
-
-1. 访问 [wechaty.io](https://wechaty.io)
-2. 注册并登录
-3. 在账号设置中获取 Token
-4. 将 Token 填入 `.env` 文件
+3. 创建 API Key
 
 ## 使用方法
 
-### 每日自动总结（推荐）
-
-设置 crontab 定时任务，每天早上 9 点运行：
+### 列出所有群聊
 
 ```bash
-# 编辑 crontab
-crontab -e
-
-# 添加以下内容（在每天 9 点运行）
-0 9 * * * cd /path/to/wechat-summary && python main_v2.py >> summary.log 2>&1
+python main.py --list-rooms
 ```
 
-### 手动运行
-
-#### 分析昨天的讨论
+### 分析昨天的消息
 
 ```bash
-python main_v2.py
+python main.py
 ```
 
-#### 分析指定日期的讨论
+### 指定群组和日期
 
 ```bash
-python main_v2.py --date 2024-08-20
+python main.py --room "美股群" --date 2025-02-25
 ```
 
-#### 分析特定群聊
+### 分析今天的消息
 
 ```bash
-# 通过群名称
-python main_v2.py --group "美股交流群1"
-
-# 通过群 ID
-python main_v2.py --group "7273788767"
+python main.py --today
 ```
 
-#### 测试模式（不使用真实 LLM）
+### 查看配置
 
 ```bash
-python test_zhipu.py
+python main.py --config
 ```
 
 ## 输出示例
 
-生成的报告包含以下内容：
-
 ```markdown
 # 群讨论总结
 
-**时间范围：** 2024-08-20 00:00 - 23:59
-**总结日期：** 2024-08-21
+**时间范围：** 2025-02-25
+**总结日期：** 2025-02-26
 
 ## 📊 讨论概览
 共讨论了 3 个话题
 
 ## 📌 话题 1: 苹果公司财报讨论
 ### 💬 讨论内容
-大家关注 AAPL 今天的股价表现，新发布会消息影响很大，机构普遍看好 Q4 表现。
+大家关注 AAPL 今天的股价表现，新发布会消息影响很大...
 
 ### ✅ 结论
 苹果财报季预期积极，iPhone 16 销量值得期待。
@@ -146,193 +126,101 @@ python test_zhipu.py
 ### 📈 具体个股
 **苹果 AAPL**
 - 股价预期上涨，机构看好 Q4 表现
-
-**MSFT 微软**
-- Azure 云业务增长强劲
-- Copilot 产品成为新增长点
 ```
+
+## 成本预估
+
+| 提供商 | 日成本 | 月成本 |
+|--------|--------|--------|
+| 智谱 AI GLM 4 Flash | ~¥0.10 | ~¥3 |
+| DeepSeek | ~¥0.15 | ~¥4.5 |
+| OpenAI | ~¥1.0 | ~¥30 |
+
+*基于 100 条消息/天估算*
 
 ## 配置说明
 
 ### LLM API 配置
 
-支持三种 LLM API：
-
-#### 智谱 AI GLM（推荐）⭐⭐⭐⭐⭐
-
-- 优点：中文支持好，性价比高，速度快
-- 价格：约 0.001 元/千 token
-- 配置：`ZHIPU_API_KEY` 和 `ZHIPU_BASE_URL`
-
-**详细指南**：[ZHIPU_GUIDE.md](ZHIPU_GUIDE.md)
-
-#### DeepSeek（备选）⭐⭐⭐⭐⭐
-
-- 优点：性能稳定，性价比高
-- 价格：约 0.001 元/千 token
-- 配置：`DEEPSEEK_API_KEY` 和 `DEEPSEEK_BASE_URL`
-
-#### OpenAI（备选）⭐⭐⭐
-
-- 优点：性能稳定，生态完善
-- 价格：约 0.005 元/千 token
-- 配置：`OPENAI_API_KEY`
-
-### 群聊配置
-
-支持两种方式配置群聊：
-
-1. **群名称列表**（推荐）：
-   ```bash
-   TARGET_GROUPS=["美股交流群1", "美股策略群", "美股技术分析"]
-   ```
-
-2. **群 ID 列表**（精确）：
-   ```bash
-   GROUP_IDS=["7273788767", "1234567890", "9876543210"]
-   ```
-
-### 时间配置
-
-默认总结昨天的 00:00-23:59：
+支持三种 LLM API（按优先级尝试）：
 
 ```bash
-SUMMARY_TIME="09:00"  # 每天早上 9 点执行
-TIMEZONE="Asia/Shanghai"  # 时区设置
+# 智谱 AI（推荐）
+ZHIPU_API_KEY=sk-xxx
+ZHIPU_BASE_URL=https://open.bigmodel.cn/api/paas/v4
+
+# DeepSeek
+DEEPSEEK_API_KEY=sk-xxx
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+
+# OpenAI
+OPENAI_API_KEY=sk-xxx
+```
+
+### 消息过滤配置
+
+```bash
+# 消息类型（1=文本）
+MSG_TYPES=[1]
+
+# 时间范围
+MSG_TIME_START=00:00
+MSG_TIME_END=23:59
+
+# 最大消息数（防止 token 溢出）
+MAX_MESSAGES=500
 ```
 
 ## 工作流程
 
-1. **登录微信** → 扫码登录，建立连接
-2. **监听消息** → 持续监听群消息
-3. **时间筛选** → 筛选指定时间范围的讨论
-4. **LLM 分析** → 使用 LLM 提取主题、内容、股票信息
-5. **生成报告** → 生成 Markdown 格式总结
-6. **保存/输出** → 保存到文件并打印到控制台
+```
+微信电脑版备份 → MSG.db → PyWxDump 解密 →
+消息过滤 → LLM 分析 → 报告生成 → Markdown 输出
+```
 
-## 成本预估
+## 项目结构
 
-### 智谱 AI GLM 4.7 Flash（推荐）
-
-- **价格**：输入 0.001 元/千 token，输出 0.001 元/千 token
-- **每天使用量**：假设 100 条消息，平均 500 tokens/条
-- **每日成本**：
-  - 输入：100 × 500 × 0.001 = 0.05 元
-  - 输出：100 × 500 × 0.001 = 0.05 元
-  - **合计：约 0.10 元/天**
-
-- **每月成本**：
-  - 30 天 × 0.10 元 = **约 3 元/月**
-
-### DeepSeek
-
-- **价格**：输入 0.001 元/千 token，输出 0.002 元/千 token
-- **每天成本**：约 0.15 元
-- **每月成本**：约 4.5 元
-
-### OpenAI
-
-- **价格**：输入 0.005 元/千 token，输出 0.015 元/千 token
-- **每天成本**：约 1.0 元
-- **每月成本**：约 30 元
-
-### 超出估算情况
-
-如果消息量更大：
-
-- **每天 200 条消息，每条 800 tokens**
-
-**智谱 AI GLM 4.7 Flash**：
-- 每天：约 0.20 元
-- 每月：约 6 元
-
-**OpenAI**：
-- 每天：约 2.0 元
-- 每月：约 60 元
+```
+wechat-summary/
+├── main.py              # 主程序入口
+├── config.py            # 配置管理
+├── wx_db_reader.py      # 微信数据库读取器
+├── time_filter.py       # 消息过滤器
+├── llm_analyzer.py      # LLM 分析器
+├── report_generator.py  # 报告生成器
+├── requirements.txt     # 依赖列表
+└── backup/              # 旧代码备份（Wechaty 方案）
+```
 
 ## 常见问题
 
-### 1. 微信登录失败
+### 1. 数据库连接失败
 
-- 检查 Token 是否正确
-- 确保网络连接正常
-- 尝试重新获取 Token
+确保已在微信电脑版中备份聊天记录到电脑。
 
-### 2. 没有收到消息
+### 2. 未找到群聊
 
-- 确保群聊配置正确
-- 检查微信是否在运行
-- 确认群聊权限
+运行 `python main.py --list-rooms` 查看可用的群聊列表。
 
 ### 3. LLM 分析失败
 
-- 检查 API Key 是否有效
-- 确认 API 配额是否充足
-- 查看错误日志
+检查 API Key 是否有效，确认配额充足。
 
-### 4. Token 限制
+### 4. 数据库加密
 
-- 如果消息量很大，可以调整 `max_tokens` 参数
-- 或者分批分析消息
+微信数据库使用 SQLCipher 加密，PyWxDump 会自动提取密钥。
 
-## 高级配置
+## 合规说明
 
-### 调整 LLM 模型
-
-在 `llm_analyzer_v2.py` 中修改：
-
-```python
-# GLM 4.7 Flash（默认，推荐）
-self.model = "glm-4.7-flash"
-
-# GLM 4 Plus（性能更强，更贵）
-self.model = "glm-4-plus"
-
-# GLM 4 Air（最便宜）
-self.model = "glm-4-air"
-```
-
-### 调整消息数量限制
-
-在 `llm_analyzer_v2.py` 中调整：
-
-```python
-for msg in filtered_messages[:500]:  # 最多分析 500 条消息
-```
-
-### 自定义报告格式
-
-在 `report_generator.py` 中修改 `_build_report` 方法
-
-## 故障排查
-
-### 查看日志
-
-```bash
-python main_v2.py 2>&1 | tee wechat-summary.log
-```
-
-### 测试配置
-
-```bash
-# 测试时间管理
-python -c "from time_manager import TimeManager; print(TimeManager.get_yesterday_range())"
-
-# 测试智谱 AI 连接
-python test_zhipu.py
-```
-
-## 文档索引
-
-- **README.md**（本文档）- 完整使用文档
-- **QUICKSTART.md** - 5 分钟快速入门
-- **SUMMARY.md** - 项目总结和费用预估
-- **ZHIPU_GUIDE.md** - 智谱 AI GLM 详细指南
+- ✅ 仅分析个人微信账号的聊天记录
+- ✅ 使用微信官方备份功能，不使用第三方协议
+- ✅ 不涉及未经授权的数据获取
+- ⚠️ 请勿用于非法用途
 
 ## 许可证
 
 MIT License
 
-## 支持
+## 致谢
 
-如有问题，请查看文档或提交 Issue 或联系维护者。
+- [PyWxDump](https://github.com/TEST-AUDIT/PyWxDump) - 微信数据库解密工具
