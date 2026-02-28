@@ -1,5 +1,5 @@
 # WeChat 数据库解密与读取
-pywxdump-mini>=2024.0.0
+pywxdump>=2.4.0
 
 # 环境变量管理
 python-dotenv==1.0.1
