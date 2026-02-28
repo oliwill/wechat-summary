@@ -30,7 +30,9 @@ class Config:
     OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
     # LLM 优先级（按顺序尝试）
-    LLM_PROVIDERS: List[str] = ast.literal_eval(os.getenv("LLM_PROVIDERS", '["zhipu", "deepseek", "openai"]'))
+    LLM_PROVIDERS: List[str] = ast.literal_eval(
+        os.getenv("LLM_PROVIDERS", '["zhipu", "deepseek", "openai"]')
+    )
 
     # ==================== 微信数据库配置 ====================
     # 微信数据库路径（可选，默认自动检测）
@@ -157,7 +159,8 @@ class Config:
         print("当前配置:")
         print(f"  LLM 提供商: {llm_config['name']}")
         print(f"  LLM 模型: {llm_config['model']}")
-        print(f"  API Key: {'*' * 20}{llm_config['api_key'][-4:] if llm_config['api_key'] else 'None'}")
+        api_key_suffix = (llm_config['api_key'][-4:] if llm_config['api_key'] else 'None')
+        print(f"  API Key: {'*' * 20}{api_key_suffix}")
         print(f"  目标群聊: {cls.TARGET_ROOMS if cls.TARGET_ROOMS else '交互选择'}")
         print(f"  时区: {cls.TIMEZONE}")
         print(f"  最大消息数: {cls.MAX_MESSAGES}")

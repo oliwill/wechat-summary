@@ -1,6 +1,8 @@
+"""报告生成模块"""
+import os
 from typing import List, Dict, Any
 from datetime import datetime
-import json
+
 
 class ReportGenerator:
     """报告生成器"""
@@ -8,7 +10,8 @@ class ReportGenerator:
     def __init__(self):
         pass
 
-    def generate(self, analysis_result: Dict[str, Any], date_range: tuple) -> str:
+    def generate(self, analysis_result: Dict[str, Any],
+                 date_range: tuple) -> str:
         """
         生成 Markdown 格式的总结报告
 
@@ -26,23 +29,28 @@ class ReportGenerator:
         report = self._build_report(topics, start_time, end_time)
         return report
 
-    def _build_report(self, topics: List[Dict[str, Any]], start_time: datetime, end_time: datetime) -> str:
+    def _build_report(self, topics: List[Dict[str, Any]],
+                      start_time: datetime, end_time: datetime) -> str:
         """构建 Markdown 报告"""
 
         lines = []
-        lines.append(f"# 美股群讨论总结")
-        lines.append(f"\n**时间范围：** {start_time.strftime('%Y-%m-%d')} {start_time.strftime('%H:%M')} - {end_time.strftime('%H:%M')}")
+        lines.append("# 群讨论总结")
+        lines.append(
+            f"\n**时间范围：** {start_time.strftime('%Y-%m-%d')} "
+            f"{start_time.strftime('%H:%M')} - {end_time.strftime('%H:%M')}"
+        )
         lines.append(f"**总结日期：** {datetime.now().strftime('%Y-%m-%d')}")
         lines.append("")
 
         # 总览
-        lines.append(f"## 📊 讨论概览")
+        lines.append("## 📊 讨论概览")
         lines.append(f"共讨论了 {len(topics)} 个话题")
         lines.append("")
 
         # 话题列表
         for idx, topic in enumerate(topics, 1):
-            lines.append(f"## 📌 话题 {idx}: {topic.get('title', '未命名话题')}")
+            title = topic.get('title', '未命名话题')
+            lines.append(f"## 📌 话题 {idx}: {title}")
             lines.append("")
 
             # 讨论内容

@@ -3,12 +3,9 @@
 使用 PyWxDump 读取微信电脑版本地数据库
 """
 import os
-import json
 import sqlite3
-import hashlib
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional
 from datetime import datetime
-from pathlib import Path
 import subprocess
 
 

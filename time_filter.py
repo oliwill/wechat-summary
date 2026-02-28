@@ -2,7 +2,7 @@
 消息过滤模块
 按时间、群组、消息类型过滤微信消息
 """
-from typing import List, Dict, Any, Optional, Set
+from typing import List, Dict, Any, Set
 from datetime import datetime, timedelta
 
 
@@ -142,15 +142,14 @@ class TimeFilter:
 
         if strategy == "recent":
             return messages[-limit:]
-        elif strategy == "oldest":
+        if strategy == "oldest":
             return messages[:limit]
-        elif strategy == "sample":
+        if strategy == "sample":
             # 均匀采样
             step = len(messages) / limit
             indices = [int(i * step) for i in range(limit)]
             return [messages[i] for i in indices]
-        else:
-            return messages[-limit:]
+        return messages[-limit:]
 
 
 class DateRange:

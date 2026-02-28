@@ -2,7 +2,7 @@
 LLM 分析模块
 使用 LLM API 分析微信群消息
 """
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from datetime import datetime
 import json
 from openai import OpenAI
@@ -80,21 +80,20 @@ class LLMAnalyzer:
                     "success": False,
                     "error": "API Key 无效或未配置"
                 }
-            elif "403" in error_msg:
+            if "403" in error_msg:
                 return {
                     "success": False,
                     "error": "API Key 无权限或余额不足"
                 }
-            elif "429" in error_msg:
+            if "429" in error_msg:
                 return {
                     "success": False,
                     "error": "API 调用次数超限，请稍后再试"
                 }
-            else:
-                return {
-                    "success": False,
-                    "error": error_msg
-                }
+            return {
+                "success": False,
+                "error": error_msg
+            }
 
     def _build_prompt(self, messages: List[Dict[str, Any]],
                       start_time: datetime, end_time: datetime) -> str:
@@ -173,11 +172,13 @@ class LLMAnalyzer:
                     pass
 
             # 解析完全失败，返回原始文本
+            discussion = (response_text[:500] + "..."
+                         if len(response_text) > 500 else response_text)
             return {
                 "topics": [
                     {
                         "title": "未解析",
-                        "discussion": response_text[:500] + "..." if len(response_text) > 500 else response_text,
+                        "discussion": discussion,
                         "conclusion": "",
                         "stocks": []
                     }
