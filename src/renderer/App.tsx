@@ -38,6 +38,7 @@ interface LLMConfig {
 function App() {
   const [weChatInfo, setWeChatInfo] = useState<WeChatInfo | null>(null)
   const [dbOpened, setDbOpened] = useState(false)
+  const [selectedPath, setSelectedPath] = useState<string | null>(null)
   const [chatGroups, setChatGroups] = useState<ChatGroup[]>([])
   const [selectedGroup, setSelectedGroup] = useState<ChatGroup | null>(null)
   const [timeRange, setTimeRange] = useState<{ start: string; end: string }>({
@@ -51,7 +52,7 @@ function App() {
   const [summary, setSummary] = useState<SummaryResult | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [step, setStep] = useState<'welcome' | 'select-group' | 'time-range' | 'summary'>('welcome')
+  const [step, setStep] = useState<'welcome' | 'select-path' | 'select-group' | 'time-range' | 'summary'>('welcome')
 
   // Demo data for testing
   const demoGroups: ChatGroup[] = [
@@ -106,6 +107,41 @@ function App() {
       alert('未能自动找到微信数据库，请确保微信已登录并运行过')
     } else {
       alert('未能检测到微信安装，请确保微信已安装并运行过')
+    }
+  }
+
+  const handleSelectPath = async () => {
+    const path = await window.electronAPI?.selectDirectory()
+    if (!path) {
+      return
+    }
+
+    setSelectedPath(path)
+
+    // Scan for MSG.db files
+    const dirContents = await window.electronAPI?.readDirectory(path) || []
+    const dbFiles = dirContents.filter(item =>
+      item.name.startsWith('MSG') && item.name.endsWith('.db')
+    )
+
+    if (dbFiles.length > 0) {
+      // Use first found database
+      const dbPath = dbFiles[0].path
+      const result = await window.electronAPI?.openWechatDb(dbPath)
+      if (result?.success) {
+        setDbOpened(true)
+        const groups = await window.electronAPI?.getChatGroups()
+        if (groups && groups.length > 0) {
+          setChatGroups(groups)
+          setStep('select-group')
+        } else {
+          alert('数据库打开成功，但未找到群聊数据')
+        }
+      } else {
+        alert(`打开数据库失败: ${result?.error}`)
+      }
+    } else {
+      alert('所选目录下未找到微信数据库文件 (MSG.db)')
     }
   }
 
@@ -255,13 +291,23 @@ function App() {
               <button className="btn btn-primary" onClick={handleStartDemo}>
                 试用 Demo
               </button>
-              
+
+              <button className="btn btn-secondary" onClick={handleSelectPath}>
+                选择微信数据路径
+              </button>
+
               {(weChatInfo || chatGroups.length > 0) && (
                 <button className="btn btn-secondary" onClick={handleUseRealData}>
-                  使用真实数据
+                  使用自动检测数据
                 </button>
               )}
             </div>
+
+            {selectedPath && (
+              <div className="status-badge info">
+                📁 已选择路径: {selectedPath}
+              </div>
+            )}
 
             {dbOpened && (
               <div className="status-badge success">
@@ -281,6 +327,7 @@ function App() {
                   <option value="openai">OpenAI</option>
                   <option value="anthropic">Anthropic (Claude)</option>
                   <option value="azure">Azure OpenAI</option>
+                  <option value="zhipu">Zhipu AI (智谱)</option>
                 </select>
               </div>
 
@@ -290,18 +337,18 @@ function App() {
                   type="password"
                   value={llmConfig.apiKey}
                   onChange={(e) => setLlmConfig({ ...llmConfig, apiKey: e.target.value })}
-                  placeholder={llmConfig.provider === 'openai' ? 'sk-...' : 'API Key'}
+                  placeholder={llmConfig.provider === 'openai' ? 'sk-...' : llmConfig.provider === 'zhipu' ? 'Zhipu API Key' : 'API Key'}
                 />
               </div>
 
-              {llmConfig.provider === 'openai' && (
+              {(llmConfig.provider === 'openai' || llmConfig.provider === 'zhipu') && (
                 <div className="form-group">
                   <label>模型 (可选):</label>
                   <input
                     type="text"
                     value={llmConfig.model || ''}
                     onChange={(e) => setLlmConfig({ ...llmConfig, model: e.target.value })}
-                    placeholder="gpt-3.5-turbo"
+                    placeholder={llmConfig.provider === 'zhipu' ? 'glm-4' : 'gpt-3.5-turbo'}
                   />
                 </div>
               )}

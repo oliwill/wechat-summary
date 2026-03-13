@@ -1,5 +1,5 @@
 export interface LLMConfig {
-  provider: 'openai' | 'azure' | 'anthropic'
+  provider: 'openai' | 'azure' | 'anthropic' | 'zhipu'
   apiKey: string
   model?: string
   baseUrl?: string
@@ -175,6 +175,34 @@ export async function generateSummary(
       if (!response.ok) {
         const error = await response.text()
         return { summary: '', error: `Azure API错误: ${error}` }
+      }
+
+      const data = await response.json() as any
+      return { summary: data.choices[0]?.message?.content || '' }
+    }
+
+    // Zhipu AI
+    if (config.provider === 'zhipu') {
+      response = await fetch(config.baseUrl || 'https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${config.apiKey}`
+        },
+        body: JSON.stringify({
+          model: config.model || 'glm-4',
+          messages: [
+            { role: 'system', content: '你是一个专业的群聊总结助手，擅长从聊天记录中提取有价值的信息。' },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.7,
+          max_tokens: 2000
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.text()
+        return { summary: '', error: `Zhipu AI API错误: ${error}` }
       }
 
       const data = await response.json() as any
