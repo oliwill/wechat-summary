@@ -1,27 +1,8 @@
-# 环境变量
-.env
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-venv/
-env/
-ENV/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# 日志
+node_modules/
+dist/
+dist-electron/
+release/
 *.log
-
-# 报告
-summary_*.md
-
-# 测试数据
-test_data/
+.DS_Store
+.env
+.env.local

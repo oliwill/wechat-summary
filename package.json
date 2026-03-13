@@ -1,0 +1,71 @@
+{
+  "name": "wechat-summary",
+  "version": "1.0.0",
+  "description": "WeChat Group Chat Summary Tool",
+  "main": "dist-electron/main/main.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
+    "dev:vite": "vite",
+    "dev:electron": "wait-on http://localhost:5173 && npm run build:electron && electron .",
+    "build": "npm run build:vite && npm run build:electron",
+    "build:vite": "vite build",
+    "build:electron": "tsc -p tsconfig.node.json",
+    "package": "npm run build && electron-builder --win --dir",
+    "dist": "npm run build && electron-builder --win"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oliwill/wechat-summary.git"
+  },
+  "keywords": [
+    "wechat",
+    "summary",
+    "electron",
+    "chat"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/oliwill/wechat-summary/issues"
+  },
+  "homepage": "https://github.com/oliwill/wechat-summary#readme",
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^20.19.37",
+    "@types/react": "^18.3.28",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "concurrently": "^9.2.1",
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8",
+    "typescript": "^5.9.3",
+    "vite": "^5.4.21",
+    "wait-on": "^8.0.5"
+  },
+  "build": {
+    "appId": "com.wechat.summary",
+    "productName": "WeChat Summary",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "node_modules/better-sqlite3/**/*",
+      "node_modules/bindings/**/*",
+      "node_modules/file-uri-to-path/**/*"
+    ],
+    "asar": false,
+    "win": {
+      "target": "portable"
+    },
+    "npmRebuild": true,
+    "nodeGypRebuild": false
+  }
+}

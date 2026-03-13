@@ -1,226 +1,147 @@
-# 群讨论自动总结工具
+# WeChat Summary (微信群聊总结工具)
 
-基于微信电脑版本地数据库的群消息总结工具，零封号风险，合规安全。
+一个基于 Electron + React 的桌面应用，可以读取微信聊天记录并使用 AI 生成群聊精华总结。
 
-[![GitHub](https://img.shields.io/badge/GitHub-微信%20群%20总结-blue)](https://github.com/oliwill/wechat-summary)
-[![Python](https://img.shields.io/badge/Python-3.8+-blue)](https://www.python.org/)
-[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+![WeChat Summary](https://img.shields.io/badge/WeChat-Summary-blue)
+![Electron](https://img.shields.io/badge/Electron-33.4-green)
+![React](https://img.shields.io/badge/React-18.3-blue)
+![License](https://img.shields.io/badge/License-ISC-green)
 
-## 功能特点
+## 功能特性
 
-- 📊 自动分析群消息，提取讨论主题
-- 💬 详细记录讨论内容和结论
-- 📈 识别讨论中的个股及观点
-- 🤖 基于 LLM 智能分析（支持智谱 AI、DeepSeek、OpenAI）
-- 📅 按时间范围筛选消息
-- 📝 生成 Markdown 格式报告
-- ✅ **零封号风险**（使用微信官方备份功能）
-- 🔒 **合规安全**（仅分析个人数据）
+- 📱 读取本地微信聊天记录数据库
+- 🤖 支持多种 LLM 提供商：OpenAI、Anthropic (Claude)、Azure OpenAI
+- 📝 自动生成群聊精华总结
+- 🖥️ 跨平台桌面应用 (Windows/macOS/Linux)
+- 🔒 本地处理，数据不上传服务器
 
-## 核心变化
+## 系统要求
 
-| 原方案 | 新方案 |
-|--------|--------|
-| Wechaty（网页协议） | 微信电脑版 MSG.db |
-| 实时监听 | 本地数据库读取 |
-| 高封号风险 | 零风险合规 |
-
-## 技术栈
-
-- **Python 3.8+**
-- **PyWxDump** - 微信数据库解密
-- **OpenAI SDK** - LLM API 客户端
-- **SQLite** - 微信数据库读取
+- Windows 10/11 或 macOS 10.15+
+- 已安装微信并登录过
+- Node.js 18+ (开发环境)
+- LLM API Key (OpenAI/Claude/Azure)
 
 ## 快速开始
 
-### 1. 安装依赖
+### 安装
 
 ```bash
+# 克隆项目
+git clone https://github.com/oliwill/wechat-summary.git
 cd wechat-summary
-pip install pywxdump-mini python-dotenv openai lxml
+
+# 安装依赖
+npm install
 ```
 
-### 2. 配置环境变量
+### 开发模式
 
 ```bash
-cp .env.example .env
+npm run dev
 ```
 
-编辑 `.env` 文件：
+这会同时启动 Vite 开发服务器和 Electron 应用。
+
+### 构建
 
 ```bash
-# LLM API 配置（推荐智谱 AI）
-ZHIPU_API_KEY=your-zhipu-api-key-here
-ZHIPU_BASE_URL=https://open.bigmodel.cn/api/paas/v4
+# 构建前端和 Electron 代码
+npm run build
 
-# 目标群组（可选，运行时可交互选择）
-TARGET_ROOMS=["美股交流群1", "美股策略群"]
+# 打包为可执行文件
+npm run dist
 ```
 
-### 3. 微信电脑版备份
+打包后的可执行文件位于 `release` 目录下。
 
-首次使用前，需要在微信电脑版中备份聊天记录：
+## 使用说明
 
-1. 打开微信电脑版
-2. 设置 → 聊天记录备份 → 备份到电脑
-3. 备份完成后，数据存储在 `~/Documents/WeChat Files/[wxid]/MSG/`
+### 1. 启动应用
 
-### 4. 获取 LLM API Key
+运行构建后的可执行文件或 `npm run dev` 启动开发模式。
 
-**智谱 AI（推荐）**：
-1. 访问 https://open.bigmodel.cn/
-2. 使用 GitHub 登录
-3. 创建 API Key
+### 2. 配置 LLM
 
-## 使用方法
+首次使用时需要在界面中配置 LLM：
 
-### 列出所有群聊
+| 提供商 | API Key 获取方式 |
+|--------|------------------|
+| OpenAI | [OpenAI API Keys](https://platform.openai.com/api-keys) |
+| Anthropic | [Anthropic Console](https://console.anthropic.com/) |
+| Azure | Azure OpenAI Service |
 
-```bash
-python main.py --list-rooms
-```
+可选配置：
+- **模型**：使用自定义模型（默认：gpt-3.5-turbo / claude-3-haiku）
+- **Base URL**：自定义 API 端点（适用于代理或私有部署）
 
-### 分析昨天的消息
+### 3. 选择群聊
 
-```bash
-python main.py
-```
+应用会自动检测本地微信数据：
+- 点击「使用真实数据」自动读取
+- 或点击「试用 Demo」查看示例
 
-### 指定群组和日期
+### 4. 生成总结
 
-```bash
-python main.py --room "美股群" --date 2025-02-25
-```
-
-### 分析今天的消息
-
-```bash
-python main.py --today
-```
-
-### 查看配置
-
-```bash
-python main.py --config
-```
-
-## 输出示例
-
-```markdown
-# 群讨论总结
-
-**时间范围：** 2025-02-25
-**总结日期：** 2025-02-26
-
-## 📊 讨论概览
-共讨论了 3 个话题
-
-## 📌 话题 1: 苹果公司财报讨论
-### 💬 讨论内容
-大家关注 AAPL 今天的股价表现，新发布会消息影响很大...
-
-### ✅ 结论
-苹果财报季预期积极，iPhone 16 销量值得期待。
-
-### 📈 具体个股
-**苹果 AAPL**
-- 股价预期上涨，机构看好 Q4 表现
-```
-
-## 成本预估
-
-| 提供商 | 日成本 | 月成本 |
-|--------|--------|--------|
-| 智谱 AI GLM 4 Flash | ~¥0.10 | ~¥3 |
-| DeepSeek | ~¥0.15 | ~¥4.5 |
-| OpenAI | ~¥1.0 | ~¥30 |
-
-*基于 100 条消息/天估算*
-
-## 配置说明
-
-### LLM API 配置
-
-支持三种 LLM API（按优先级尝试）：
-
-```bash
-# 智谱 AI（推荐）
-ZHIPU_API_KEY=sk-xxx
-ZHIPU_BASE_URL=https://open.bigmodel.cn/api/paas/v4
-
-# DeepSeek
-DEEPSEEK_API_KEY=sk-xxx
-DEEPSEEK_BASE_URL=https://api.deepseek.com
-
-# OpenAI
-OPENAI_API_KEY=sk-xxx
-```
-
-### 消息过滤配置
-
-```bash
-# 消息类型（1=文本）
-MSG_TYPES=[1]
-
-# 时间范围
-MSG_TIME_START=00:00
-MSG_TIME_END=23:59
-
-# 最大消息数（防止 token 溢出）
-MAX_MESSAGES=500
-```
-
-## 工作流程
-
-```
-微信电脑版备份 → MSG.db → PyWxDump 解密 →
-消息过滤 → LLM 分析 → 报告生成 → Markdown 输出
-```
+1. 选择目标群聊
+2. 设置时间范围（昨天/最近7天/最近30天/自定义）
+3. 点击「生成总结」
+4. 复制结果到剪贴板
 
 ## 项目结构
 
 ```
 wechat-summary/
-├── main.py              # 主程序入口
-├── config.py            # 配置管理
-├── wx_db_reader.py      # 微信数据库读取器
-├── time_filter.py       # 消息过滤器
-├── llm_analyzer.py      # LLM 分析器
-├── report_generator.py  # 报告生成器
-├── requirements.txt     # 依赖列表
-└── backup/              # 旧代码备份（Wechaty 方案）
+├── src/
+│   ├── main/           # Electron 主进程
+│   │   ├── main.ts     # 应用入口
+│   │   ├── wechat-db.ts    # 微信数据库读取
+│   │   └── llm-client.ts   # LLM API 调用
+│   ├── preload/        # 预加载脚本
+│   │   └── preload.ts
+│   └── renderer/       # React 前端
+│       ├── App.tsx     # 主应用组件
+│       ├── main.tsx   # React 入口
+│       └── styles/    # 样式文件
+├── package.json
+├── vite.config.ts
+└── tsconfig.json
 ```
+
+## 技术栈
+
+- **前端框架**：React 18 + TypeScript
+- **桌面框架**：Electron 33
+- **构建工具**：Vite 5
+- **数据库**：better-sqlite3 (读取微信本地数据)
+- **AI 集成**：OpenAI API / Anthropic API / Azure OpenAI
+
+## 注意事项
+
+1. **数据安全**：所有数据处理均在本地进行，API Key 仅用于调用 LLM，不会保存到任何服务器
+2. **微信数据库**：微信数据库通常位于 `Documents/WeChat Files/[微信号]/Msg/` 目录
+3. **数据库加密**：部分微信版本数据库可能加密，需要额外处理
+4. **API 费用**：使用 LLM API 会产生费用，请注意控制使用量
 
 ## 常见问题
 
-### 1. 数据库连接失败
+### Q: 无法读取微信数据？
+A: 确保微信已正常登录并运行过，数据才会写入本地数据库。
 
-确保已在微信电脑版中备份聊天记录到电脑。
+### Q: API 调用失败？
+A: 检查 API Key 是否正确，网络是否可达，或尝试更换模型。
 
-### 2. 未找到群聊
-
-运行 `python main.py --list-rooms` 查看可用的群聊列表。
-
-### 3. LLM 分析失败
-
-检查 API Key 是否有效，确认配额充足。
-
-### 4. 数据库加密
-
-微信数据库使用 SQLCipher 加密，PyWxDump 会自动提取密钥。
-
-## 合规说明
-
-- ✅ 仅分析个人微信账号的聊天记录
-- ✅ 使用微信官方备份功能，不使用第三方协议
-- ✅ 不涉及未经授权的数据获取
-- ⚠️ 请勿用于非法用途
+### Q: 总结生成不理想？
+A: 可以尝试调整时间范围，或更换不同的 LLM 提供商/模型。
 
 ## 许可证
 
-MIT License
+ISC License
 
-## 致谢
+## 贡献
 
-- [PyWxDump](https://github.com/TEST-AUDIT/PyWxDump) - 微信数据库解密工具
+欢迎提交 Issue 和 Pull Request！
+
+---
+
+本简报由 AI 自动生成
