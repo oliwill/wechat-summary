@@ -69,28 +69,35 @@ function App() {
   }, [])
 
   const initWeChat = async () => {
+    console.log('[initWeChat] Starting initialization...')
     try {
       const info = await window.electronAPI?.getWechatInfo()
+      console.log('[initWeChat] WeChat info:', info)
       if (info) {
         setWeChatInfo(info)
-        // Try to open the database
-        const msgPath = info.msgPath
-        // Look for MSG.db or MSG0.db
-        const dbPath = `${msgPath}\\MSG.db` // Windows path
-        const exists = await window.electronAPI?.fileExists(dbPath)
-        if (exists) {
-          const result = await window.electronAPI?.openWechatDb(dbPath)
-          if (result?.success) {
-            setDbOpened(true)
-            const groups = await window.electronAPI?.getChatGroups()
-            if (groups && groups.length > 0) {
-              setChatGroups(groups)
-            }
+        // Open the database directly (msgPath now points to MSG.db file)
+        const dbPath = info.msgPath
+        console.log('[initWeChat] Database path:', dbPath)
+        const result = await window.electronAPI?.openWechatDb(dbPath)
+        console.log('[initWeChat] Open database result:', result)
+        if (result?.success) {
+          setDbOpened(true)
+          const groups = await window.electronAPI?.getChatGroups()
+          console.log('[initWeChat] Groups loaded:', groups)
+          if (groups && groups.length > 0) {
+            setChatGroups(groups)
           }
+        } else {
+          console.error('[initWeChat] Database open failed:', result?.error)
+          alert(`数据库打开失败: ${result?.error}`)
         }
+      } else {
+        console.warn('[initWeChat] No WeChat info returned')
+        alert('未能检测到微信安装路径，请手动点击"选择微信数据路径"按钮选择微信目录')
       }
     } catch (err) {
       console.error('Init WeChat failed:', err)
+      alert(`初始化失败: ${err}`)
     }
   }
 

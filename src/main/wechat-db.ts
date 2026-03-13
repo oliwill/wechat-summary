@@ -52,7 +52,7 @@ export class WeChatDB {
         possiblePaths.push({
           basePath: wechatPath1,
           wxid,
-          msgPath: path.join(wechatPath1, wxid, 'Msg')
+          msgPath: path.join(wechatPath1, wxid, 'Msg', 'MSG.db')
         })
       }
     }
@@ -65,7 +65,7 @@ export class WeChatDB {
         possiblePaths.push({
           basePath: programFilesX86Path,
           wxid,
-          msgPath: path.join(programFilesX86Path, wxid, 'Msg')
+          msgPath: path.join(programFilesX86Path, wxid, 'Msg', 'MSG.db')
         })
       }
     }
@@ -78,7 +78,7 @@ export class WeChatDB {
         possiblePaths.push({
           basePath: programFilesPath,
           wxid,
-          msgPath: path.join(programFilesPath, wxid, 'Msg')
+          msgPath: path.join(programFilesPath, wxid, 'Msg', 'MSG.db')
         })
       }
     }
@@ -93,7 +93,7 @@ export class WeChatDB {
           possiblePaths.push({
             basePath: wechatAppDataPath,
             wxid,
-            msgPath: path.join(wechatAppDataPath, wxid, 'Msg')
+            msgPath: path.join(wechatAppDataPath, wxid, 'Msg', 'MSG.db')
           })
         }
       }
