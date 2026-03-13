@@ -37,34 +37,84 @@ export class WeChatDB {
 
   /**
    * Get WeChat data directory path
+   * Tries multiple common installation locations
    */
   static getWeChatPath(): WeChatPath | null {
+    const possiblePaths: WeChatPath[] = []
+
+    // Path 1: User Documents (most common)
     const homeDir = os.homedir()
     const documentsPath = path.join(homeDir, 'Documents')
-    const wechatBasePath = path.join(documentsPath, 'WeChat Files')
-
-    if (!fs.existsSync(wechatBasePath)) {
-      return null
+    const wechatPath1 = path.join(documentsPath, 'WeChat Files')
+    if (fs.existsSync(wechatPath1)) {
+      const wxid = WeChatDB.findFirstUserDir(wechatPath1)
+      if (wxid) {
+        possiblePaths.push({
+          basePath: wechatPath1,
+          wxid,
+          msgPath: path.join(wechatPath1, wxid, 'Msg')
+        })
+      }
     }
 
-    // Find the user directory (contains WeChat files)
-    const dirs = fs.readdirSync(wechatBasePath).filter(d => {
-      const fullPath = path.join(wechatBasePath, d)
-      return fs.statSync(fullPath).isDirectory() && fs.existsSync(path.join(fullPath, 'Msg'))
-    })
-
-    if (dirs.length === 0) {
-      return null
+    // Path 2: Program Files (x86) - like user's system
+    const programFilesX86Path = path.join('D:\\Program Files (x86)', 'Tencent', 'WeChat', 'WeChat Files')
+    if (fs.existsSync(programFilesX86Path)) {
+      const wxid = WeChatDB.findFirstUserDir(programFilesX86Path)
+      if (wxid) {
+        possiblePaths.push({
+          basePath: programFilesX86Path,
+          wxid,
+          msgPath: path.join(programFilesX86Path, wxid, 'Msg')
+        })
+      }
     }
 
-    // Use the first user directory
-    const wxid = dirs[0]
-    const msgPath = path.join(wechatBasePath, wxid, 'Msg')
+    // Path 3: Program Files
+    const programFilesPath = path.join('D:\\Program Files', 'Tencent', 'WeChat', 'WeChat Files')
+    if (fs.existsSync(programFilesPath)) {
+      const wxid = WeChatDB.findFirstUserDir(programFilesPath)
+      if (wxid) {
+        possiblePaths.push({
+          basePath: programFilesPath,
+          wxid,
+          msgPath: path.join(programFilesPath, wxid, 'Msg')
+        })
+      }
+    }
 
-    return {
-      basePath: wechatBasePath,
-      wxid,
-      msgPath
+    // Path 4: AppData
+    const appDataPath = process.env.APPDATA || ''
+    if (appDataPath) {
+      const wechatAppDataPath = path.join(appDataPath, 'Tencent', 'WeChat', 'WeChat Files')
+      if (fs.existsSync(wechatAppDataPath)) {
+        const wxid = WeChatDB.findFirstUserDir(wechatAppDataPath)
+        if (wxid) {
+          possiblePaths.push({
+            basePath: wechatAppDataPath,
+            wxid,
+            msgPath: path.join(wechatAppDataPath, wxid, 'Msg')
+          })
+        }
+      }
+    }
+
+    // Return first found path, or null if none found
+    return possiblePaths.length > 0 ? possiblePaths[0] : null
+  }
+
+  /**
+   * Helper to find first user directory with Msg folder
+   */
+  private static findFirstUserDir(basePath: string): string | null {
+    try {
+      const dirs = fs.readdirSync(basePath).filter(d => {
+        const fullPath = path.join(basePath, d)
+        return fs.statSync(fullPath).isDirectory() && fs.existsSync(path.join(fullPath, 'Msg'))
+      })
+      return dirs.length > 0 ? dirs[0] : null
+    } catch {
+      return null
     }
   }
 
